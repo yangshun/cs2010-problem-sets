@@ -7,93 +7,85 @@ import java.io.*;
 // write list of collaborators here:
 // year 2015 hash code: JESg5svjYpIsmHmIjabX (do NOT delete this line)
 
+class Node {
+  public TreeMap<Character, Node> neighbours;
+  public TreeSet<String> words;
+
+  public Node() {
+    neighbours = new TreeMap<Character, Node>();
+    words = new TreeSet<String>();
+  }
+
+  public String neighboursAsString() {
+    Set<Character> set = neighbours.keySet();
+    if (set == null) {
+      return "[]";
+    }
+    String ns = Arrays.toString(set.toArray());
+    return ns == null ? "[]" : ns;
+  }
+
+  public String wordsAsString() {
+    String ns = Arrays.toString(words.toArray());
+    return ns == null ? "[]" : ns;
+  }
+}
+
+class Trie {
+  private Node root;
+
+  public Trie() {
+    root = new Node();
+  }
+
+  private void insertWord(Node node, String word, String originalWord) {
+    node.words.add(originalWord);
+    Character c = word.charAt(0);
+    Node nextNode = node.neighbours.get(c);
+    if (nextNode == null) {
+      nextNode = new Node();
+      node.neighbours.put(c, nextNode);
+    }
+    nextNode.words.add(originalWord);
+    if (word.length() > 1) {
+      insertWord(nextNode, word.substring(1), originalWord);
+    }
+  }
+
+  public void insertWord(String word) {
+    for (int i = 0; i < word.length(); i++) {
+      insertWord(root, word.substring(i), word);
+    }
+  }
+
+  public int findWord(String word) {
+    Node node = root;
+    for (int i = 0; i < word.length(); i++) {
+      Character c = word.charAt(i);
+      node = node.neighbours.get(c);
+      if (node == null && i != word.length() - 1) {
+        return 0;
+      }
+    }
+    return node.words.size();
+  }
+}
+
 class BabyNamesR {
   // if needed, declare a private data structure here that
   // is accessible to all methods in this class
-  ArrayList<String> names;
+  Trie names;
 
   public BabyNamesR() {
-    // Write necessary code during construction
-    //
-    // write your answer here
-    names = new ArrayList<String>();
+    names = new Trie();
   }
 
   void AddSuggestion(String babyName) {
-    // You have to insert the information: babyName
-    // into your chosen data structure
-    //
-    // write your answer here
-    names.add(babyName);
+    names.insertWord(babyName);
   }
 
   int Query(String SUBSTR) {
-    int ans = 0;
-
-    // You have to answer how many baby name contains substring SUBSTR
-    //
-    // write your answer here
-    int length = names.size();
-    for (int i = 0; i < length; i++) {
-      ans += kmp(SUBSTR, names.get(i)) ? 1 : 0;
-    }
-
-    return ans;
-  }
-
-  private Boolean kmp(String pat, String txt) {
-    int M = pat.length();
-    int N = txt.length();
-
-    int[] lps = new int[pat.length()];
-    int j = 0;
-
-    // Compute LPS array
-    int len = 0;  // length of the previous longest prefix suffix
-    int i;
-
-    lps[0] = 0; // lps[0] is always 0
-    i = 1;
-
-    // the loop calculates lps[i] for i = 1 to M-1
-    while (i < M) {
-      if (pat.charAt(i) == pat.charAt(len)) {
-        len++;
-        lps[i] = len;
-        i++;
-      } else { // (pat[i] != pat[len])
-        if (len != 0) {
-          // This is tricky. Consider the example AAACAAAA and i = 7.
-          len = lps[len-1];
-          // Also, note that we do not increment i here
-        } else { // if (len == 0)
-          lps[i] = 0;
-          i++;
-        }
-      }
-    }
-
-    i = 0;  // index for txt[]
-    while (i < N) {
-      if (pat.charAt(j) == txt.charAt(i)) {
-        j++;
-        i++;
-      }
-
-      if (j == M) {
-        return true;
-      } else if (i < N && pat.charAt(j) != txt.charAt(i)) { // mismatch after j matches
-        // Do not match lps[0..lps[j-1]] characters,
-        // they will match anyway
-        if (j != 0) {
-         j = lps[j-1];
-        } else {
-         i = i+1;
-        }
-      }
-    }
-
-    return false;
+    return names.findWord(SUBSTR);
   }
 
   void run() throws Exception {
