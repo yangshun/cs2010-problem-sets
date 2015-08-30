@@ -34,7 +34,6 @@ class BinarySearchTree<E extends Comparable<E>> {
         this.data = data;
         left = null;
         right = null;
-        height = 0;
         size = 1;
     }
 
@@ -177,12 +176,12 @@ class BinarySearchTree<E extends Comparable<E>> {
     int currentIndex;
 
     if (direction == -1) {
-      // Left 
+      // Left
       int rightSubTreeSize = 0;
       if (localRoot.right != null) {
         rightSubTreeSize = localRoot.right.size;
       }
-      currentIndex = parentIndex - rightSubTreeSize - 1; 
+      currentIndex = parentIndex - rightSubTreeSize - 1;
     } else if (direction == 1) {
       // Right
       int leftSubTreeSize = 0;
@@ -198,7 +197,7 @@ class BinarySearchTree<E extends Comparable<E>> {
       }
       currentIndex = leftSubTreeSize + 1;
     }
-    
+
     if (compResult == 0) {
       if (!isLeftBound) {
         return currentIndex - 1;
