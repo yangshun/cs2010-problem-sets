@@ -8,44 +8,76 @@ import java.io.*;
 // year 2015 hash code: JESg5svjYpIsmHmIjabX (do NOT delete this line)
 
 class BabyNames {
-  TreeMap<String, Boolean> maleNames;
-  TreeMap<String, Boolean> femaleNames;
+  TreeMap<String, TreeMap<String, Boolean> > maleNames;
+  TreeMap<String, TreeMap<String, Boolean> > femaleNames;
   TreeMap <String, Integer> names;
 
   // --------------------------------------------
 
   public BabyNames() {
-    maleNames = new TreeMap<String, Boolean>();
-    femaleNames = new TreeMap<String, Boolean>();
+    maleNames = new TreeMap<String, TreeMap<String, Boolean> >();
+    femaleNames = new TreeMap<String, TreeMap<String, Boolean> >();
+    for (int i = 65; i < 65 + 26; i++) {
+      char c = (char) i;
+      TreeMap<String, Boolean> maleNemberChar = new TreeMap<String, Boolean>();
+      maleNames.put(Character.toString(c), maleNemberChar);
+
+      TreeMap<String, Boolean> femaleNemberChar = new TreeMap<String, Boolean>();
+      femaleNames.put(Character.toString(c), femaleNemberChar);
+    }
+
     names = new TreeMap <String, Integer>();
   }
 
   void AddSuggestion(String babyName, int genderSuitability) {
+    char c = babyName.charAt(0);
     if (genderSuitability == 1) {
-      maleNames.put(babyName, true);
+      maleNames.get(Character.toString(c)).put(babyName, true);
     } else if (genderSuitability == 2) {
-      femaleNames.put(babyName, true);
+      femaleNames.get(Character.toString(c)).put(babyName, true);
     }
     names.put(babyName, genderSuitability);
   }
 
   void RemoveSuggestion(String babyName) {
     int genderSuitability = names.get(babyName);
+    String c = babyName.substring(0, 1);
     if (genderSuitability == 1) {
-      maleNames.remove(babyName);
+      maleNames.get(c).remove(babyName);
     } else if (genderSuitability == 2) {
-      femaleNames.remove(babyName);
+      femaleNames.get(c).remove(babyName);
     }
   }
 
   int Query(String START, String END, int genderPreference) {
     int total = 0;
+    String s = START.substring(0, 1);
+    String e = END.substring(0, 1);
+    int startInt = (int)s.charAt(0);
+    int endInt = (int)e.charAt(0);
+
     if (genderPreference == 1 || genderPreference == 0) {
-      total += maleNames.headMap(END).size() - maleNames.headMap(START).size();
+      if (startInt == endInt) {
+        total += maleNames.get(e).headMap(END).size() - maleNames.get(s).headMap(START).size();
+      } else {
+        total += maleNames.get(s).tailMap(START, true).size();
+        total += maleNames.get(e).headMap(END).size();
+        for (int i = startInt + 1; i <= endInt - 1; i++) {
+          total += maleNames.get(Character.toString((char)i)).size();
+        }
+      }
     }
 
     if (genderPreference == 2 || genderPreference == 0) {
-      total += femaleNames.headMap(END).size() - femaleNames.headMap(START).size();
+      if (startInt == endInt) {
+        total += femaleNames.get(e).headMap(END).size() - femaleNames.get(s).headMap(START).size();
+      } else {
+        total += femaleNames.get(s).tailMap(START, true).size();
+        total += femaleNames.get(e).headMap(END).size();
+        for (int i = startInt + 1; i <= endInt - 1; i++) {
+          total += femaleNames.get(Character.toString((char)i)).size();
+        }
+      }
     }
 
     return total;
