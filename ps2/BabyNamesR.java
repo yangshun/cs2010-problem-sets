@@ -10,56 +10,46 @@ import java.io.*;
 class BabyNamesR {
   // if needed, declare a private data structure here that
   // is accessible to all methods in this class
-  public TreeMap<String, String[]> nameSuffixes;
+  private ArrayList<String> nameSuffixes;
+  int number = 0;
 
   public BabyNamesR() {
-    nameSuffixes = new TreeMap<String, String[]>();
+    nameSuffixes = new ArrayList<String>();
   }
 
   void AddSuggestion(String babyName) {
     int N = babyName.length();
-    String[] suffixes = new String[N];
     for (int i = 0; i < N; i++) {
-      suffixes[i] = babyName.substring(i, N);
+      nameSuffixes.add(babyName.substring(i, N) + ":" + String.valueOf(number));
     }
-    Arrays.sort(suffixes);
-    nameSuffixes.put(babyName, suffixes);
+    number++;
   }
 
-  boolean countOccurences(String pattern, String[] suffixes, String key) {
+  int countOccurences(String pattern, ArrayList<String> suffixes) {
     int l = 0;
-    int r = suffixes.length - 1;
+    int r = suffixes.size() - 1;
     while (l < r) {
       int mid = (l+r) / 2;
-      if (pattern.compareTo(suffixes[mid]) > 0) {
+      if (pattern.compareTo(suffixes.get(mid)) > 0) {
         l = mid + 1;
       } else {
         r = mid;
       }
     }
     int s = l;
-    r = suffixes.length - 1;
-    while (l < r) {
-      int mid = (l+r) / 2;
-      if (pattern.compareTo(suffixes[mid]) < 0) {
-        r = mid;
-      } else {
-        l = mid + 1;
-      }
+    int n = suffixes.size() - 1;
+
+    TreeSet<String> numbers = new TreeSet<String>();
+    while (s <= n && suffixes.get(s).contains(pattern)) {
+      numbers.add(suffixes.get(s).split(":")[1]);
+      s++;
     }
-    return s != r ? true : suffixes[s].contains(pattern);
+
+    return numbers.size();
   }
 
   int Query(String SUBSTR) {
-    int count = 0;
-    for (Map.Entry<String, String[]> entry : nameSuffixes.entrySet()) {
-      String key = entry.getKey();
-      Object value = entry.getValue();
-      if (countOccurences(SUBSTR, (String[])value, key)) {
-        count += 1;
-      }
-    }
-    return count;
+    return countOccurences(SUBSTR, nameSuffixes);
   }
 
   void run() throws Exception {
@@ -69,6 +59,7 @@ class BabyNamesR {
     int N = Integer.parseInt(br.readLine());
     while (N-- > 0)
       AddSuggestion(br.readLine());
+    Collections.sort(nameSuffixes);
     int Q = Integer.parseInt(br.readLine());
     while (Q-- > 0)
       pr.println(Query(br.readLine())); // SUBSTR
