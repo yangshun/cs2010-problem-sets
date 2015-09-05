@@ -28,7 +28,7 @@ class BabyNamesR {
 
   boolean countOccurences(String pattern, String[] suffixes, String key) {
     int l = 0;
-    int r = suffixes.length;
+    int r = suffixes.length - 1;
     while (l < r) {
       int mid = (l+r) / 2;
       if (pattern.compareTo(suffixes[mid]) > 0) {
@@ -38,7 +38,7 @@ class BabyNamesR {
       }
     }
     int s = l;
-    r = suffixes.length;
+    r = suffixes.length - 1;
     while (l < r) {
       int mid = (l+r) / 2;
       if (pattern.compareTo(suffixes[mid]) < 0) {
@@ -47,7 +47,7 @@ class BabyNamesR {
         l = mid + 1;
       }
     }
-    return s != r ? true : suffixes[Math.min(suffixes.length - 1, s)].contains(pattern);
+    return s != r ? true : suffixes[s].contains(pattern);
   }
 
   int Query(String SUBSTR) {
