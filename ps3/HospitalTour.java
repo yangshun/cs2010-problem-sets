@@ -13,48 +13,58 @@ class HospitalTour {
   private TreeMap<Integer, TreeMap<Integer, Boolean> > AdjMatrix;
   private int[] RatingScore;
 
-  private TreeMap<Integer, Boolean> visited;
-  private TreeMap<Integer, Integer> depth;
-  private TreeMap<Integer, Integer> low;
-  private TreeMap<Integer, Integer> parent;
+  private boolean[] visited;
+  private int[] depth;
+  private int[] low;
+  private int[] parent;
   private TreeMap<Integer, Boolean> articulationPoints;
 
   void getArticulationPoints(int i, int d) {
-    visited.put(i, true);
-    depth.put(i, d);
-    low.put(i, d);
+    visited[i] = true;
+    depth[i] = d;
+    low[i] = d;
     int childCount = 0;
     boolean isArticulation = false;
 
     for (Map.Entry<Integer, Boolean> entry : AdjMatrix.get(i).entrySet()) {
       int ni = (int)entry.getKey();
 
-      if (visited.get(ni) == null) {
-        parent.put(ni, i);
+      if (!visited[ni]) {
+        parent[ni] = i;
         getArticulationPoints(ni, d + 1);
         childCount++;
-        if (low.get(ni) != null && depth.get(i) != null && (low.get(ni) >= depth.get(i))) {
+
+        int low_i = low[i];
+        int low_ni = low[ni];
+        int depth_i = depth[i];
+
+        if (low_ni != -1 && depth_i != -1 && (low_ni >= depth_i)) {
           isArticulation = true;
         }
-        if (low.get(i) != null && low.get(ni) != null) {
-          low.put(i, Math.min(low.get(i), low.get(ni)));
-        } else if (low.get(i) == null && low.get(ni) != null) {
-          low.put(i, low.get(ni));
-        } else if (low.get(i) != null && low.get(ni) == null) {
-          low.put(i, low.get(i));
+        if (low_i != -1 && low_ni != -1) {
+          low[i] = Math.min(low_i, low_ni);
+        } else if (low_i == -1 && low_ni != -1) {
+          low[i] = low_ni;
+        } else if (low_i != -1 && low_ni == -1) {
+          low[i] = low_i;
         }
-      } else if (parent.get(i) == null || ni != parent.get(i)) {
-        if (low.get(i) != null && depth.get(ni) != null) {
-          low.put(i, Math.min(low.get(i), depth.get(ni)));
-        } else if (low.get(i) == null && depth.get(ni) != null) {
-          low.put(i, depth.get(ni));
-        } else if (low.get(i) != null && depth.get(ni) == null) {
-          low.put(i, low.get(i));
+      } else if (ni != parent[i]) {
+        int depth_ni = depth[ni];
+        int low_i = low[i];
+
+        if (low_i != -1 && depth_ni != -1) {
+          low[i] = Math.min(low_i, depth_ni);
+        } else if (low_i == -1 && depth_ni != -1) {
+          low[i] = depth_ni;
+        } else if (low_i != -1 && depth_ni == -1) {
+          low[i] = low_i;
         }
       }
     }
 
-    if ((parent.get(i) != null && isArticulation) || (parent.get(i) == null && childCount > 1)) {
+    int parent_i = parent[i];
+
+    if ((parent_i != -1 && isArticulation) || (parent_i == -1 && childCount > 1)) {
       articulationPoints.put(i, true);
     }
   }
@@ -62,10 +72,18 @@ class HospitalTour {
   int Query() {
     int minimum = 100001;
 
-    visited = new TreeMap<Integer, Boolean>();
-    depth = new TreeMap<Integer, Integer>();
-    low = new TreeMap<Integer, Integer>();
-    parent = new TreeMap<Integer, Integer>();
+    visited = new boolean[V];
+    Arrays.fill(visited, false);
+
+    depth = new int[V];
+    Arrays.fill(depth, -1);
+
+    low = new int[V];
+    Arrays.fill(low, -1);
+
+    parent = new int[V];
+    Arrays.fill(parent, -1);
+
     articulationPoints = new TreeMap<Integer, Boolean>();
 
     getArticulationPoints(0, 0);
