@@ -31,7 +31,8 @@ class OutForAWalk {
   int[] dijkstra(int source) {
     int dist[] = new int[V];
 
-    TreeMap<Integer, Integer> Q = new TreeMap<Integer, Integer>();
+    TreeMap<IntegerPair, Boolean> Q = new TreeMap<IntegerPair, Boolean>();
+    Vector<IntegerPair> nodes = new Vector<IntegerPair>();
 
     dist[source] = 0;
 
@@ -39,13 +40,15 @@ class OutForAWalk {
       if (v != source) {
         dist[v] = Integer.MAX_VALUE;
       }
+      IntegerPair p = new IntegerPair(dist[v], v);
+      nodes.add(p);
     }
 
-    Q.put(source, dist[source]);
+    Q.put(nodes.get(source), true);
 
     while (Q.size() > 0) {
-      int u = Q.firstKey();
-      Q.remove(u);
+      Map.Entry<IntegerPair, Boolean> pair = Q.pollFirstEntry();
+      int u = pair.getKey()._second;
 
       Vector <IntegerPair> neighboursOfU = AdjList.get(u);
       Iterator itr = neighboursOfU.iterator();
@@ -57,9 +60,10 @@ class OutForAWalk {
         int effort = Math.max(dist[u], v._second);
         if (effort < dist[neighbour]) {
           dist[neighbour] = effort;
-          if (!Q.containsKey(neighbour)) {
-            Q.put(neighbour, effort);
-          }
+          IntegerPair p = (IntegerPair)nodes.get(neighbour);
+          Q.remove(p);
+          p._first = effort;
+          Q.put(p, true);
         }
       }
     }
