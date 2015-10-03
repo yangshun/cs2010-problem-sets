@@ -39,8 +39,9 @@ class OutForAWalk {
       if (v != source) {
         dist[v] = Integer.MAX_VALUE;
       }
-      Q.put(v, dist[v]);
     }
+
+    Q.put(source, dist[source]);
 
     while (Q.size() > 0) {
       int u = Q.firstKey();
