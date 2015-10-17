@@ -16,77 +16,79 @@ class Labor {
   // is accessible to all methods in this class
   // --------------------------------------------
 
-  int[][] timeFromSource;
+  private int[] dist;
+  private int[] depth;
+  private int[] parent;
 
   public Labor() {
-    // Write necessary code during construction
-    //
-    // write your answer here
-    timeFromSource = new int[1001][V];
-
   }
 
   void PreProcess() {
-    int MAXIMUM_SOURCE_VERTEX = Math.min(1000, V-1);
+    dist = new int[V];
+    depth = new int[V];
+    parent = new int[V];
 
-    for (int i = 0; i <= MAXIMUM_SOURCE_VERTEX; i++) {
-      timeFromSource[i] = dijkstra(i);
-    }
-  }
-
-  int[] dijkstra(int source) {
-    int dist[] = new int[V];
-
-    TreeMap<IntegerPair, Boolean> Q = new TreeMap<IntegerPair, Boolean>();
-    Vector<IntegerPair> nodes = new Vector<IntegerPair>();
+    int source = 0;
+    LinkedList<IntegerPair> q = new LinkedList<IntegerPair>();
 
     dist[source] = 0;
+    depth[source] = 0;
+    parent[source] = -1;
 
-    for (int v = 0; v < V; v++) {
-      if (v != source) {
-        dist[v] = Integer.MAX_VALUE;
-      }
-      IntegerPair p = new IntegerPair(dist[v], v);
-      nodes.add(p);
-    }
+    q.add(new IntegerPair(source, 0));
 
-    Q.put(nodes.get(source), true);
-
-    while (Q.size() > 0) {
-      Map.Entry<IntegerPair, Boolean> pair = Q.pollFirstEntry();
-      int u = pair.getKey()._second;
+    while (!q.isEmpty()) {
+      IntegerPair pair = q.pollFirst();
+      int u = pair.first();
+      int weight = pair.second();
 
       Vector <IntegerPair> neighboursOfU = AdjList.get(u);
       Iterator itr = neighboursOfU.iterator();
 
       while (itr.hasNext()) {
         IntegerPair v = (IntegerPair)itr.next();
-        int neighbour = v._first;
-
-        int effort = dist[u] + v._second;
-        if (effort < dist[neighbour]) {
-          dist[neighbour] = effort;
-          IntegerPair p = (IntegerPair)nodes.get(neighbour);
-          Q.remove(p);
-          p._first = effort;
-          Q.put(p, true);
+        int neighbour = v.first();
+        if (parent[u] != neighbour) {
+          dist[neighbour] = weight + v.second();
+          depth[neighbour] = depth[u] + 1;
+          parent[neighbour] = u;
+          q.add(new IntegerPair(neighbour, dist[neighbour]));
         }
       }
     }
+  }
 
-    return dist;
+  int calculateDistance(int s, int t) {
+    int deeperNode = -1;
+    int shallowNode = -1;
+
+    if (depth[s] > depth[t]) {
+      deeperNode = s;
+      shallowNode = t;
+    } else {
+      deeperNode = t;
+      shallowNode = s;
+    }
+
+    while (depth[deeperNode] != depth[shallowNode]) {
+      deeperNode = parent[deeperNode];
+    }
+
+    while (deeperNode != shallowNode) {
+      deeperNode = parent[deeperNode];
+      shallowNode = parent[shallowNode];
+    }
+
+    return dist[s] + dist[t] - 2 * dist[deeperNode];
   }
 
   int Query(int s, int t, int k) {
-    return timeFromSource[s][t] == Integer.MAX_VALUE ? -1 : timeFromSource[s][t];
+    if (s == t) {
+      return 0;
+    } else {
+      return calculateDistance(s, t);
+    }
   }
-
-  // You can add extra function if needed
-  // --------------------------------------------
-
-
-
-  // --------------------------------------------
 
   void run() throws Exception {
     // you can alter this method if you need to do so
