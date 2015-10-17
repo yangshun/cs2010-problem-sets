@@ -10,75 +10,89 @@ import java.io.*;
 class Labor {
   private int V; // number of vertices in the graph (number of junctions in Singapore map)
   private int Q; // number of queries
-  private Vector < Vector < IntegerPair > > AdjList; // the weighted graph (the Singapore map), the length of each edge (road) is stored here too, as the weight of edge
+  private Vector < Vector < IntegerTriple > > AdjList; // the weighted graph (the Singapore map), the length of each edge (road) is stored here too, as the weight of edge
 
   // if needed, declare a private data structure here that
   // is accessible to all methods in this class
   // --------------------------------------------
 
-  int[][] timeFromSource;
+  int[][][] timeFromSource;
 
   public Labor() {
     // Write necessary code during construction
     //
     // write your answer here
-    timeFromSource = new int[1001][V];
+    timeFromSource = new int[1001][1001][V];
 
   }
 
   void PreProcess() {
-    int MAXIMUM_SOURCE_VERTEX = Math.min(1000, V-1);
+    int MAXIMUM_SOURCE_VERTEX = Math.min(9, V-1);
 
     for (int i = 0; i <= MAXIMUM_SOURCE_VERTEX; i++) {
-      timeFromSource[i] = dijkstra(i);
+      int [][]temp = new int[1001][V];
+      for (int k = 0; k < 1001; k++) {
+        temp[k] = dijkstra(i, k);
+      }
+      timeFromSource[i] = temp;
     }
   }
 
-  int[] dijkstra(int source) {
-    int dist[] = new int[V];
+  int[] dijkstra(int source, int C) {
+    int time[] = new int[V];
+    int mincost[] = new int[V];
 
-    TreeMap<IntegerPair, Boolean> Q = new TreeMap<IntegerPair, Boolean>();
-    Vector<IntegerPair> nodes = new Vector<IntegerPair>();
+    TreeMap<IntegerTriple, Boolean> Q = new TreeMap<IntegerTriple, Boolean>();
+    Vector<IntegerTriple> nodes = new Vector<IntegerTriple>();
 
-    dist[source] = 0;
+    time[source] = 0;
+    mincost[source] = 0;
 
     for (int v = 0; v < V; v++) {
       if (v != source) {
-        dist[v] = Integer.MAX_VALUE;
+        time[v] = Integer.MAX_VALUE;
+        mincost[v] = Integer.MAX_VALUE;
       }
-      IntegerPair p = new IntegerPair(dist[v], v);
+      IntegerTriple p = new IntegerTriple(mincost[v], time[v], v);
       nodes.add(p);
     }
 
     Q.put(nodes.get(source), true);
 
     while (Q.size() > 0) {
-      Map.Entry<IntegerPair, Boolean> pair = Q.pollFirstEntry();
-      int u = pair.getKey()._second;
+      Map.Entry<IntegerTriple, Boolean> triple = Q.pollFirstEntry();
+      int u = triple.getKey().third();
+      int d = triple.getKey().second();
+      int c = triple.getKey().first();
 
-      Vector <IntegerPair> neighboursOfU = AdjList.get(u);
+      Vector <IntegerTriple> neighboursOfU = AdjList.get(u);
       Iterator itr = neighboursOfU.iterator();
 
       while (itr.hasNext()) {
-        IntegerPair v = (IntegerPair)itr.next();
-        int neighbour = v._first;
+        IntegerTriple v = (IntegerTriple)itr.next();
+        int neighbour = v.first();
+        int weight = v.second();
+        int cost = v.third();
 
-        int effort = dist[u] + v._second;
-        if (effort < dist[neighbour]) {
-          dist[neighbour] = effort;
-          IntegerPair p = (IntegerPair)nodes.get(neighbour);
+        int newTime = time[u] + weight;
+        int newCost = mincost[u] + cost;
+        if (newTime < time[neighbour] && newCost <= C) {
+          time[neighbour] = newTime;
+          mincost[neighbour] = newCost;
+          IntegerTriple p = (IntegerTriple)nodes.get(neighbour);
           Q.remove(p);
-          p._first = effort;
+          p._first = newCost;
+          p._second = newTime;
           Q.put(p, true);
         }
       }
     }
 
-    return dist;
+    return time;
   }
 
   int Query(int s, int t, int k) {
-    return timeFromSource[s][t] == Integer.MAX_VALUE ? -1 : timeFromSource[s][t];
+    return timeFromSource[s][k][t] == Integer.MAX_VALUE ? -1 : timeFromSource[s][k][t];
   }
 
   // You can add extra function if needed
@@ -98,14 +112,14 @@ class Labor {
       V = sc.nextInt();
 
       // clear the graph and read in a new graph as Adjacency List
-      AdjList = new Vector < Vector < IntegerPair > >();
+      AdjList = new Vector < Vector < IntegerTriple > >();
       for (int i = 0; i < V; i++) {
-        AdjList.add(new Vector < IntegerPair >());
+        AdjList.add(new Vector < IntegerTriple >());
 
         int k = sc.nextInt();
         while (k-- > 0) {
           int j = sc.nextInt(), w = sc.nextInt();
-          AdjList.get(i).add(new IntegerPair(j, w)); // edge (road) weight (in minutes) is stored here
+          AdjList.get(i).add(new IntegerTriple(j, w, 1)); // edge (road) weight (in minutes) is stored here
         }
       }
 
@@ -187,4 +201,30 @@ class IntegerPair implements Comparable < IntegerPair > {
 
   Integer first() { return _first; }
   Integer second() { return _second; }
+}
+
+class IntegerTriple implements Comparable < IntegerTriple > {
+  Integer _first, _second, _third;
+
+  public IntegerTriple(Integer f, Integer s, Integer t) {
+    _first = f;
+    _second = s;
+    _third = t;
+  }
+
+  public int compareTo(IntegerTriple o) {
+    if (!this.first().equals(o.first()))
+      return this.first() - o.first();
+    else {
+      if (!this.second().equals(o.second())) {
+        return this.second() - o.second();
+      } else {
+        return this.third() - o.third();
+      }
+    }
+  }
+
+  Integer first() { return _first; }
+  Integer second() { return _second; }
+  Integer third() { return _third; }
 }
