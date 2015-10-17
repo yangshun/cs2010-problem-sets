@@ -15,7 +15,6 @@ class Labor {
   // if needed, declare a private data structure here that
   // is accessible to all methods in this class
   // --------------------------------------------
-
   private int[] dist;
   private int[] depth;
   private int[] parent;
@@ -89,6 +88,10 @@ class Labor {
       return calculateDistance(s, t);
     }
   }
+
+
+
+  // --------------------------------------------
 
   void run() throws Exception {
     // you can alter this method if you need to do so
@@ -171,6 +174,8 @@ class IntegerScanner { // coded by Ian Leow, using any other I/O method is not r
     }
   }
 }
+
+
 
 class IntegerPair implements Comparable < IntegerPair > {
   Integer _first, _second;
