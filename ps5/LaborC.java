@@ -17,23 +17,22 @@ class Labor {
   // --------------------------------------------
 
   int[][][] timeFromSource;
+  private TreeSet<Integer> processedSources;
 
   public Labor() {
     // Write necessary code during construction
     //
     // write your answer here
-    timeFromSource = new int[1001][1001][V];
-
+    timeFromSource = new int[1000][1000][V];
+    processedSources = new TreeSet<Integer>();
   }
 
   void PreProcess() {
-    int MAXIMUM_SOURCE_VERTEX = Math.min(9, V-1);
+    int MAXIMUM_SOURCE_VERTEX = Math.min(999, V-1);
+    int K = Math.min(V, 20);
 
     for (int i = 0; i <= MAXIMUM_SOURCE_VERTEX; i++) {
-      int [][]temp = new int[1001][V];
-      for (int k = 0; k < 1001; k++) {
-        temp[k] = dijkstra(i, k);
-      }
+      int [][]temp = new int[K+1][1000];
       timeFromSource[i] = temp;
     }
   }
@@ -46,7 +45,7 @@ class Labor {
     Vector<IntegerTriple> nodes = new Vector<IntegerTriple>();
 
     time[source] = 0;
-    mincost[source] = 0;
+    mincost[source] = 1;
 
     for (int v = 0; v < V; v++) {
       if (v != source) {
@@ -92,15 +91,14 @@ class Labor {
   }
 
   int Query(int s, int t, int k) {
+    if (!processedSources.contains(s)) {
+      int K = Math.min(V, 20);
+      for (int c = 0; c <= K; c++) {
+        timeFromSource[s][c] = dijkstra(s, c);
+      }
+    }
     return timeFromSource[s][k][t] == Integer.MAX_VALUE ? -1 : timeFromSource[s][k][t];
   }
-
-  // You can add extra function if needed
-  // --------------------------------------------
-
-
-
-  // --------------------------------------------
 
   void run() throws Exception {
     // you can alter this method if you need to do so
