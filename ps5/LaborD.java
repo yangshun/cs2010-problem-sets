@@ -16,7 +16,6 @@ class Labor {
   // is accessible to all methods in this class
   // --------------------------------------------
   private int targetNode;
-  // private int[] visited;
   private Stack<Integer> path;
   private int[] pathNodes;
   private int[][] edges;
@@ -49,22 +48,22 @@ class Labor {
         Integer[] pathArray = path.toArray(new Integer[0]);
         boolean isUniquePath = true;
         // System.out.println("FOUND:" + Arrays.toString(path.toArray()));
-        // for (int i = 0; i < pathArray.length - 1 ; i++) {
-        //   if (edges[pathArray[i]][pathArray[i+1]] != 0) {
-        //     isUniquePath = false;
-        //     break;
-        //   }
-        // }
+        for (int i = 0; i < pathArray.length - 1 ; i++) {
+          if (edges[pathArray[i]][pathArray[i+1]] != 0) {
+            isUniquePath = false;
+            break;
+          }
+        }
 
-        // if (isUniquePath) {
-        //   for (int i = 0; i < pathArray.length - 1 ; i++) {
-        //     edges[pathArray[i]][pathArray[i+1]] = 1;
-        //   }
-        //   uniquePaths += 1;
-        // }
+        if (isUniquePath) {
+          for (int i = 0; i < pathArray.length - 1 ; i++) {
+            edges[pathArray[i]][pathArray[i+1]] = 1;
+          }
+          uniquePaths += 1;
+        }
 
-        // int popped = path.pop();
-        // pathNodes[popped] = 0;
+        int popped = path.pop();
+        pathNodes[popped] = 0;
         break;
       }
     }
@@ -84,7 +83,6 @@ class Labor {
   int Query(int s, int t, int k) {
     uniquePaths = 0;
     targetNode = t;
-    // visited = new int[V];
     path = new Stack<Integer>();
     pathNodes = new int[V];
     edges = new int[V][V];
